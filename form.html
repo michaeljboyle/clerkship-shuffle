@@ -41,7 +41,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="brand" href="#">App Engine Guestbook</a>
+          <a class="brand" href="#">Clerkship Trader</a>
           <div class="nav-collapse collapse pull-right">
             <a href="{{ url|safe }}" class="btn">{{ url_linktext }}</a>
           </div>
@@ -49,32 +49,35 @@
       </div>
     </div>
     <div class="container">
-      <!-- [START greetings] -->
-      {% for greeting in greetings %}
+      <!-- [START trades] -->
+      {% for trade in trades %}
       <div class="row">
-        {% if greeting.author %}
-          <b>{{ greeting.author.email }}
-            {% if user and user.user_id() == greeting.author.identity %}
+        {% if trade.user %}
+          <b>{{ trade.user.email }}
+            {% if user and user.email() == trade.user.email %}
               (You)
             {% endif %}
           </b> wrote:
         {% else %}
           An anonymous person wrote:
         {% endif %}
-        <blockquote>{{ greeting.content }}</blockquote>
+        <blockquote>{{ trade.current.block_num }}{{ trade.current.rotation_type }}</blockquote>
       </div>
       {% endfor %}
-      <!-- [END greetings] -->
+      <!-- [END trades] -->
 
-      <form action="/sign?guestbook_name={{ guestbook_name }}" method="post">
-        <div><textarea name="content" class="input-block-level" rows="3"></textarea></div>
-        <div><input type="submit" class="btn btn-large btn-primary" value="Sign Guestbook"></div>
+      <form action="/register?register_name={{ register_name }}" method="post">
+        <div><textarea name="current_block_num" class="input-block-level" rows="3"></textarea></div>
+        <div><textarea name="current_rotation_type" class="input-block-level" rows="3"></textarea></div>
+        <div><textarea name="desired_block_num" class="input-block-level" rows="3"></textarea></div>
+        <div><textarea name="desired_rotation_type" class="input-block-level" rows="3"></textarea></div>
+        <div><input type="submit" class="btn btn-large btn-primary" value="Submit Trade"></div>
       </form>
 
       <hr>
 
-      <form>Guestbook name:
-        <input value="{{ guestbook_name }}" name="guestbook_name">
+      <form>Register name:
+        <input value="{{ register_name }}" name="register_name">
         <input type="submit" value="switch">
       </form>
 

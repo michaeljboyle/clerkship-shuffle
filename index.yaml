@@ -1,6 +1,5 @@
 indexes:
-- kind: Greeting
+- kind: ClerkshipTrade
   ancestor: yes
   properties:
-  - name: date
-    direction: desc
+  - name: student.email

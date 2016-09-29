@@ -30,7 +30,7 @@ JINJA_ENVIRONMENT = jinja2.Environment(
     autoescape=True)
 # [END imports]
 
-DEFAULT_GUESTBOOK_NAME = 'default_guestbook'
+DEFAULT_REGISTER_NAME = 'default_register'
 
 
 # We set a parent key on the 'Greetings' to ensure that they are all
@@ -38,26 +38,30 @@ DEFAULT_GUESTBOOK_NAME = 'default_guestbook'
 # will be consistent. However, the write rate should be limited to
 # ~1/second.
 
-def guestbook_key(guestbook_name=DEFAULT_GUESTBOOK_NAME):
-    """Constructs a Datastore key for a Guestbook entity.
+def register_key(register_name=DEFAULT_REGISTER_NAME):
+    """Constructs a Datastore key for a Register entity.
 
-    We use guestbook_name as the key.
+    We use register_name as the key.
     """
-    return ndb.Key('Guestbook', guestbook_name)
+    return ndb.Key('Register', register_name)
 
 
 # [START greeting]
-class Author(ndb.Model):
-    """Sub model for representing an author."""
-    identity = ndb.StringProperty(indexed=False)
-    email = ndb.StringProperty(indexed=False)
+class Student(ndb.Model):
+    """Sub model for representing an student."""
+    email = ndb.StringProperty()
+
+class Clerkship(ndb.Model):
+    """Sub model for representing an clerkship."""
+    block_num = ndb.IntegerProperty()
+    rotation_type = ndb.StringProperty()
 
 
-class Greeting(ndb.Model):
-    """A main model for representing an individual Guestbook entry."""
-    author = ndb.StructuredProperty(Author)
-    content = ndb.StringProperty(indexed=False)
-    date = ndb.DateTimeProperty(auto_now_add=True)
+class ClerkshipTrade(ndb.Model):
+    """A main model for representing an individual clerkship trade entry."""
+    student = ndb.StructuredProperty(Student)
+    current = ndb.StructuredProperty(Clerkship)
+    desired = ndb.StructuredProperty(Clerkship)
 # [END greeting]
 
 
@@ -65,11 +69,13 @@ class Greeting(ndb.Model):
 class MainPage(webapp2.RequestHandler):
 
     def get(self):
-        guestbook_name = self.request.get('guestbook_name',
-                                          DEFAULT_GUESTBOOK_NAME)
-        greetings_query = Greeting.query(
-            ancestor=guestbook_key(guestbook_name)).order(-Greeting.date)
-        greetings = greetings_query.fetch(10)
+        register_name = self.request.get('register_name',
+                                          DEFAULT_REGISTER_NAME)
+        
+        trade_query = ClerkshipTrade.query(
+            ancestor=register_key(register_name)).order(ClerkshipTrade.student.email)
+        trades = trade_query.fetch(10)
+        
 
         user = users.get_current_user()
         if user:
@@ -81,19 +87,19 @@ class MainPage(webapp2.RequestHandler):
 
         template_values = {
             'user': user,
-            'greetings': greetings,
-            'guestbook_name': urllib.quote_plus(guestbook_name),
+            'trades': trades,
+            'register_name': urllib.quote_plus(register_name),
             'url': url,
             'url_linktext': url_linktext,
         }
 
-        template = JINJA_ENVIRONMENT.get_template('index.html')
+        template = JINJA_ENVIRONMENT.get_template('form.html')
         self.response.write(template.render(template_values))
 # [END main_page]
 
 
 # [START guestbook]
-class Guestbook(webapp2.RequestHandler):
+class Register(webapp2.RequestHandler):
 
     def post(self):
         # We set the same parent key on the 'Greeting' to ensure each
@@ -101,19 +107,22 @@ class Guestbook(webapp2.RequestHandler):
         # single entity group will be consistent. However, the write
         # rate to a single entity group should be limited to
         # ~1/second.
-        guestbook_name = self.request.get('guestbook_name',
-                                          DEFAULT_GUESTBOOK_NAME)
-        greeting = Greeting(parent=guestbook_key(guestbook_name))
+        register_name = self.request.get('register_name',
+                                          DEFAULT_REGISTER_NAME)
+        trade = ClerkshipTrade(parent=register_key(register_name))
 
         if users.get_current_user():
-            greeting.author = Author(
-                    identity=users.get_current_user().user_id(),
+            trade.student = Student(
                     email=users.get_current_user().email())
 
-        greeting.content = self.request.get('content')
-        greeting.put()
+        trade.current = Clerkship(block_num = int(self.request.get('current_block_num')),
+                                  rotation_type = self.request.get('current_rotation_type'))
 
-        query_params = {'guestbook_name': guestbook_name}
+        trade.desired = Clerkship(block_num = int(self.request.get('desired_block_num')),
+                                  rotation_type = self.request.get('desired_rotation_type'))
+        trade.put()
+
+        query_params = {'register_name': register_name}
         self.redirect('/?' + urllib.urlencode(query_params))
 # [END guestbook]
 
@@ -121,6 +130,6 @@ class Guestbook(webapp2.RequestHandler):
 # [START app]
 app = webapp2.WSGIApplication([
     ('/', MainPage),
-    ('/sign', Guestbook),
+    ('/register', Register),
 ], debug=True)
 # [END app]

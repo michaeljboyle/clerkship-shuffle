@@ -12,7 +12,7 @@ handlers:
   static_dir: bootstrap
 
 - url: /.*
-  script: guestbook.app
+  script: form.app
 # [END handlers]
 
 # [START libraries]
