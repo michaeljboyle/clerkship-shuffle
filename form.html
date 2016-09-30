@@ -41,7 +41,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="brand" href="#">Clerkship Trader</a>
+          <a class="brand" href="#">Clerkship Shuffle</a>
           <div class="nav-collapse collapse pull-right">
             <a href="{{ url|safe }}" class="btn">{{ url_linktext }}</a>
           </div>
@@ -49,7 +49,7 @@
       </div>
     </div>
     <div class="container">
-      <!-- [START trades] -->
+      <!-- [START trades]
       {% for trade in trades %}
       <div class="row">
         {% if trade.user %}
@@ -61,28 +61,41 @@
         {% else %}
           An anonymous person wrote:
         {% endif %}
-        <blockquote>{{ trade.current.block_num }}{{ trade.current.rotation_type }}</blockquote>
+        <blockquote>{{ trade.block }}: {{ trade.current }} to {{ trade.desired }}</blockquote>
       </div>
       {% endfor %}
-      <!-- [END trades] -->
-
-      <form action="/register?register_name={{ register_name }}" method="post">
-        <div><textarea name="current_block_num" class="input-block-level" rows="3"></textarea></div>
-        <div><textarea name="current_rotation_type" class="input-block-level" rows="3"></textarea></div>
-        <div><textarea name="desired_block_num" class="input-block-level" rows="3"></textarea></div>
-        <div><textarea name="desired_rotation_type" class="input-block-level" rows="3"></textarea></div>
+      [END trades] -->
+      {% for i in range(4) %}
+      <form id='{{ loop.index }}' action="/register?register_name={{ register_name }}" method="post">
+        <div>
+          <h2>Block {{ loop.index }}</h2>
+        </div>
+        <div>Current: 
+          <select name="current">
+            <option value="pcpsych">Primary Care / Psych</option>
+            <option value="imneuro">Medicine / Neurology</option>
+            <option value="surgem">Surgery / Emergency</option>
+            <option value="pedobgyn">Pediatrics / ObGyn</option>
+          </select>
+        </div>
+        <div>Desired: 
+          <select name="desired">
+            <option value="pcpsych">Primary Care / Psych</option>
+            <option value="imneuro">Medicine / Neurology</option>
+            <option value="surgem">Surgery / Emergency</option>
+            <option value="pedobgyn">Pediatrics / ObGyn</option>
+          </select>
+        </div>
+        <input type='hidden' name='block' value='{{ loop.index }}'/>
         <div><input type="submit" class="btn btn-large btn-primary" value="Submit Trade"></div>
       </form>
+      {% endfor %}
 
       <hr>
-
-      <form>Register name:
-        <input value="{{ register_name }}" name="register_name">
-        <input type="submit" value="switch">
-      </form>
 
       <a href="{{ url|safe }}">{{ url_linktext }}</a>
     </div>
   </body>
+  <script type='text/javascript' src='form.js'></script>
 </html>
 {% endautoescape %}

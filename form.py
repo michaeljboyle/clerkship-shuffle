@@ -51,17 +51,13 @@ class Student(ndb.Model):
     """Sub model for representing an student."""
     email = ndb.StringProperty()
 
-class Clerkship(ndb.Model):
-    """Sub model for representing an clerkship."""
-    block_num = ndb.IntegerProperty()
-    rotation_type = ndb.StringProperty()
-
 
 class ClerkshipTrade(ndb.Model):
     """A main model for representing an individual clerkship trade entry."""
     student = ndb.StructuredProperty(Student)
-    current = ndb.StructuredProperty(Clerkship)
-    desired = ndb.StructuredProperty(Clerkship)
+    block = ndb.IntegerProperty()
+    current = ndb.StringProperty()
+    desired = ndb.StringProperty()
 # [END greeting]
 
 
@@ -115,11 +111,10 @@ class Register(webapp2.RequestHandler):
             trade.student = Student(
                     email=users.get_current_user().email())
 
-        trade.current = Clerkship(block_num = int(self.request.get('current_block_num')),
-                                  rotation_type = self.request.get('current_rotation_type'))
-
-        trade.desired = Clerkship(block_num = int(self.request.get('desired_block_num')),
-                                  rotation_type = self.request.get('desired_rotation_type'))
+        trade.block = int(self.request.get('block'))
+        trade.current = self.request.get('current')
+        trade.desired = self.request.get('desired')
+        
         trade.put()
 
         query_params = {'register_name': register_name}
