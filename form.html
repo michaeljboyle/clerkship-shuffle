@@ -72,18 +72,16 @@
         </div>
         <div>Current: 
           <select name="current">
-            <option value="pcpsych">Primary Care / Psych</option>
-            <option value="imneuro">Medicine / Neurology</option>
-            <option value="surgem">Surgery / Emergency</option>
-            <option value="pedobgyn">Pediatrics / ObGyn</option>
+            {% for key, verbose in clerkship_mapping.iteritems() %}
+            <option value="{{ key }}">{{ verbose }}</option>
+            {% endfor %}
           </select>
         </div>
         <div>Desired: 
           <select name="desired">
-            <option value="pcpsych">Primary Care / Psych</option>
-            <option value="imneuro">Medicine / Neurology</option>
-            <option value="surgem">Surgery / Emergency</option>
-            <option value="pedobgyn">Pediatrics / ObGyn</option>
+            {% for key, verbose in clerkship_mapping.iteritems() %}
+            <option value="{{ key }}">{{ verbose }}</option>
+            {% endfor %}
           </select>
         </div>
         <input type='hidden' name='block' value='{{ loop.index }}'/>

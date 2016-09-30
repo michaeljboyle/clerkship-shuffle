@@ -45,6 +45,14 @@ def register_key(register_name=DEFAULT_REGISTER_NAME):
     """
     return ndb.Key('Register', register_name)
 
+def getClerkshipMapping():
+    return {
+        'pcpsych': 'Primary Care / Psych',
+        'imneuro': 'Medicine / Neurology',
+        'surgem': 'Surgery / Emergency',
+        'pedobgyn': 'Pediatrics / ObGyn'
+    }
+
 
 # [START greeting]
 class Student(ndb.Model):
@@ -55,9 +63,12 @@ class Student(ndb.Model):
 class ClerkshipTrade(ndb.Model):
     """A main model for representing an individual clerkship trade entry."""
     student = ndb.StructuredProperty(Student)
-    block = ndb.IntegerProperty()
-    current = ndb.StringProperty()
-    desired = ndb.StringProperty()
+    block = ndb.IntegerProperty(choices = [1, 2, 3, 4])
+    current = ndb.StringProperty(choices = getClerkshipMapping().keys())
+    desired = ndb.StringProperty(choices = getClerkshipMapping().keys())
+
+    def is_valid(self):
+        return self.current != self.desired
 # [END greeting]
 
 
@@ -87,6 +98,7 @@ class MainPage(webapp2.RequestHandler):
             'register_name': urllib.quote_plus(register_name),
             'url': url,
             'url_linktext': url_linktext,
+            'clerkship_mapping': getClerkshipMapping()
         }
 
         template = JINJA_ENVIRONMENT.get_template('form.html')
@@ -115,7 +127,8 @@ class Register(webapp2.RequestHandler):
         trade.current = self.request.get('current')
         trade.desired = self.request.get('desired')
         
-        trade.put()
+        if trade.is_valid():
+            trade.put()
 
         query_params = {'register_name': register_name}
         self.redirect('/?' + urllib.urlencode(query_params))
