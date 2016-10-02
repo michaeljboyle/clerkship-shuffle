@@ -78,23 +78,30 @@ class MainPage(webapp2.RequestHandler):
     def get(self):
         register_name = self.request.get('register_name',
                                           DEFAULT_REGISTER_NAME)
-        
-        trade_query = ClerkshipTrade.query(
-            ancestor=register_key(register_name)).order(ClerkshipTrade.student.email)
-        trades = trade_query.fetch(10)
-        
 
         user = users.get_current_user()
         if user:
             url = users.create_logout_url(self.request.uri)
             url_linktext = 'Logout'
+            trade_query = ClerkshipTrade.query(
+                ClerkshipTrade.student.email == user.email(),
+                ancestor=register_key(register_name)
+            ).order(ClerkshipTrade.block)
+            trades = trade_query.fetch(4)
         else:
             url = users.create_login_url(self.request.uri)
             url_linktext = 'Login'
+            trades = []
 
+        trade_map = {}
+        for trade in trades:
+            trade_map[trade.block] = trade
+
+        print [block for block in trade_map]
+        
         template_values = {
             'user': user,
-            'trades': trades,
+            'trades': trade_map,
             'register_name': urllib.quote_plus(register_name),
             'url': url,
             'url_linktext': url_linktext,

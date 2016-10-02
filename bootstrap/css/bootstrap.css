@@ -3365,6 +3365,16 @@ input[type="button"].btn-block {
   filter: progid:DXImageTransform.Microsoft.gradient(enabled=false);
 }
 
+.green {
+  background-color: #009900;
+  *background-color: #00c200;
+  background-image: -moz-linear-gradient(top, #00c200, #006000);
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#00c200), to(#006000));
+  background-image: -webkit-linear-gradient(top, #00c200, #006000);
+  background-image: -o-linear-gradient(top, #00c200, #006000);
+  background-image: linear-gradient(to bottom, #00c200, #006000);
+}
+
 .btn-primary:hover,
 .btn-primary:focus,
 .btn-primary:active,

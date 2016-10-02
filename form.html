@@ -71,21 +71,42 @@
           <h2>Block {{ loop.index }}</h2>
         </div>
         <div>Current: 
-          <select name="current">
+          <select id="{{ loop.index }}current" name="current">
+            {% set outerloop = loop %}
             {% for key, verbose in clerkship_mapping.iteritems() %}
-            <option value="{{ key }}">{{ verbose }}</option>
+            <option value="{{ key }}" 
+              {% if outerloop.index in trades and trades[outerloop.index]['current']|string() == key|string() %} selected {% endif %}>
+              {{ verbose }}
+            </option>
             {% endfor %}
           </select>
         </div>
-        <div>Desired: 
-          <select name="desired">
+        <div>Desired:
+          <select id="{{ loop.index }}desired" name="desired">
+            {% set outerloop = loop %}
             {% for key, verbose in clerkship_mapping.iteritems() %}
-            <option value="{{ key }}">{{ verbose }}</option>
+            <option value="{{ key }}" 
+              {% if outerloop.index in trades and trades[outerloop.index]['desired'] == key|string() %} selected {% endif %}>
+              {{ verbose }}
+            </option>
             {% endfor %}
           </select>
         </div>
         <input type='hidden' name='block' value='{{ loop.index }}'/>
-        <div><input type="submit" class="btn btn-large btn-primary" value="Submit Trade"></div>
+        <input type='hidden' name='update' 
+          {% if loop.index in trades %}
+          value='true'
+          {% else %}
+          value='false'
+          {% endif %}
+        />
+        <div><input type="submit"
+          {% if loop.index in trades %}
+          value="Update Trade" class="btn btn-large btn-primary green"
+          {% else %}
+          value="Submit Trade" class="btn btn-large btn-primary" 
+          {% endif %}
+          ></div>
       </form>
       {% endfor %}
 
@@ -94,6 +115,5 @@
       <a href="{{ url|safe }}">{{ url_linktext }}</a>
     </div>
   </body>
-  <script type='text/javascript' src='form.js'></script>
 </html>
 {% endautoescape %}
