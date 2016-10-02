@@ -30,7 +30,7 @@ JINJA_ENVIRONMENT = jinja2.Environment(
     autoescape=True)
 # [END imports]
 
-DEFAULT_REGISTER_NAME = 'default_register'
+DEFAULT_REGISTER_NAME = '1'
 
 
 # We set a parent key on the 'Greetings' to ensure that they are all
@@ -123,19 +123,31 @@ class Register(webapp2.RequestHandler):
         # rate to a single entity group should be limited to
         # ~1/second.
         register_name = self.request.get('register_name',
-                                          DEFAULT_REGISTER_NAME)
-        trade = ClerkshipTrade(parent=register_key(register_name))
+                                              DEFAULT_REGISTER_NAME)
 
-        if users.get_current_user():
-            trade.student = Student(
-                    email=users.get_current_user().email())
+        key = self.request.get('key')
+        block = int(self.request.get('block'))
+        current = self.request.get('current')
+        desired = self.request.get('desired')
 
-        trade.block = int(self.request.get('block'))
-        trade.current = self.request.get('current')
-        trade.desired = self.request.get('desired')
+        if key:
+            trade = ndb.Key(urlsafe=key).get()
+            trade.current = current
+            trade.desired = desired
+
+        else:
+            trade = ClerkshipTrade(parent=register_key(register_name))
+
+            if users.get_current_user():
+                trade.student = Student(
+                        email=users.get_current_user().email())
+
+            trade.block = block
+            trade.current = current
+            trade.desired = desired
         
-        if trade.is_valid():
-            trade.put()
+            if trade.is_valid():   
+                trade.put()
 
         query_params = {'register_name': register_name}
         self.redirect('/?' + urllib.urlencode(query_params))

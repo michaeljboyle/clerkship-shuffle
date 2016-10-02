@@ -93,11 +93,11 @@
           </select>
         </div>
         <input type='hidden' name='block' value='{{ loop.index }}'/>
-        <input type='hidden' name='update' 
+        <input type='hidden' name='key' 
           {% if loop.index in trades %}
-          value='true'
+          value='{{ trades[loop.index].key.urlsafe() }}'
           {% else %}
-          value='false'
+          value=''
           {% endif %}
         />
         <div><input type="submit"
