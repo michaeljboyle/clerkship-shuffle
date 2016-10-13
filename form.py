@@ -185,12 +185,38 @@ class Register(webapp2.RequestHandler):
             self.abort(500, detail='Unable to save record')
 # [END guestbook]
 
+class CplexOut(webapp2.RequestHandler):
+    def get(self):
+        register_name = self.request.get('register_name',
+                                         DEFAULT_REGISTER_NAME)
+        all_trades = ClerkshipTrade.query(
+                        ancestor=register_key(register_name)).fetch()
+        edges = []
+        num_nodes = len(all_trades)
+        for trade in all_trades:
+            for other_trade in all_trades:
+                # First check they're not the same
+                if trade.key.id() == other_trade.key.id():
+                    continue
+                # Check same block and whether other trade wants what current trade has
+                if trade.current == other_trade.desired and (
+                    trade.block == other_trade.block):
+                    edge_string = '{}_{}'.format(trade.key.urlsafe(),
+                                                 other_trade.key.urlsafe())
+                    edges.append(edge_string)
+        obj = [1.0 for edge in edges]
+
+        data = {'edges': edges, 'num_nodes': num_nodes, 'obj': obj}
+        self.response.headers['Content-Type'] = 'application/json'
+        response_obj = {'data': data}
+        self.response.out.write(json.dumps(response_obj))
 
 # [START app]
 app = webapp2.WSGIApplication([
     ('/', MainPage),
     ('/load', Load),
     ('/register', Register),
-    ('/list', List)
+    ('/list', List),
+    ('/cplex', CplexOut)
 ], debug=True)
 # [END app]

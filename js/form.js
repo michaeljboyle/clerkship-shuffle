@@ -1,6 +1,6 @@
 $(function() {
 
-  var backendHostUrl = 'https://clerkship-shuffle.appspot.com';
+  var backendHostUrl = 'https://clerkship-shuffle.appspot.com';//'http://localhost:8080';
 
   // Initialize Firebase
   var config = {
