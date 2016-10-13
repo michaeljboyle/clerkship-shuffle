@@ -31,6 +31,13 @@
         overflow: scroll;
       }
     </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/3.4.1/firebase.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/3.1.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/ui/live/0.5/firebase-ui-auth.js"></script>
+    <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/live/0.5/firebase-ui-auth.css" />
+    <script src="js/form.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
   </head>
   <body>
     <div class="navbar navbar-inverse navbar-fixed-top">
@@ -42,36 +49,22 @@
             <span class="icon-bar"></span>
           </button>
           <a class="brand" href="#">Clerkship Shuffle</a>
-          <div class="nav-collapse collapse pull-right">
-            <a href="{{ url|safe }}" class="btn">{{ url_linktext }}</a>
-          </div>
         </div>
       </div>
     </div>
-    <div class="container">
-      <!-- [START trades]
-      {% for trade in trades %}
-      <div class="row">
-        {% if trade.user %}
-          <b>{{ trade.user.email }}
-            {% if user and user.email() == trade.user.email %}
-              (You)
-            {% endif %}
-          </b> wrote:
-        {% else %}
-          An anonymous person wrote:
-        {% endif %}
-        <blockquote>{{ trade.block }}: {{ trade.current }} to {{ trade.desired }}</blockquote>
-      </div>
-      {% endfor %}
-      [END trades] -->
+    <div id="logged-out">
+      <h3>Sign in to access your preferences</h3>
+      <div id="firebaseui-auth-container"></div>
+    </div>
+    <div class="container" id='logged-in'>
+      <h3>Welcome, <span id="user"></span>!</h3>
       {% for i in range(4) %}
-      <form id='{{ loop.index }}' action="/register?register_name={{ register_name }}" method="post">
+      <form id='{{ loop.index }}'>
         <div>
           <h2>Block {{ loop.index }}</h2>
         </div>
         <div>Current: 
-          <select id="{{ loop.index }}current" name="current">
+          <select name="current">
             {% set outerloop = loop %}
             {% for key, verbose in clerkship_mapping.iteritems() %}
             <option value="{{ key }}" 
@@ -82,7 +75,7 @@
           </select>
         </div>
         <div>Desired:
-          <select id="{{ loop.index }}desired" name="desired">
+          <select name="desired">
             {% set outerloop = loop %}
             {% for key, verbose in clerkship_mapping.iteritems() %}
             <option value="{{ key }}" 
@@ -92,6 +85,7 @@
             {% endfor %}
           </select>
         </div>
+        <input type='hidden' name='register' value='{{ register_name }}'/>
         <input type='hidden' name='block' value='{{ loop.index }}'/>
         <input type='hidden' name='key' 
           {% if loop.index in trades %}
@@ -111,8 +105,6 @@
       {% endfor %}
 
       <hr>
-
-      <a href="{{ url|safe }}">{{ url_linktext }}</a>
     </div>
   </body>
 </html>

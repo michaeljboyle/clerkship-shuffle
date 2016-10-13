@@ -24,4 +24,12 @@ libraries:
   version: latest
 - name: jinja2
   version: latest
+- name: ssl
+  version: 2.7.11
+- name: pycrypto
+  version: 2.6
 # [END libraries]
+
+env_variables:
+  # Replace with your Firebase project ID.
+  FIREBASE_PROJECT_ID: 'clerkship-shuffle'
