@@ -1,5 +1,16 @@
 {% for record in records %}
 <div>
-  {{ record.student.email }}, {{ record.block }}, {{ record.current }}, {{ record.desired }}
+  {{ record.student.email }}, {{ record.block }}, {{ record.current }}, {{ record.desired }}, 
+  {% if record.match_to_current %}
+    {{ record.match_to_current.id() }}
+  {% else %}
+    no match_to_current 
+  {% endif %}
+  ,
+  {% if record.match_to_desired %}
+    {{ record.match_to_desired.id() }}
+  {% else %}
+    no match_to_desired
+  {% endif %}
 </div>
 {% endfor %}

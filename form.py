@@ -69,18 +69,27 @@ class ClerkshipTrade(ndb.Model):
     block = ndb.IntegerProperty(choices = [1, 2, 3, 4])
     current = ndb.StringProperty(choices = getClerkshipMapping().keys())
     desired = ndb.StringProperty(choices = getClerkshipMapping().keys())
+    match_to_desired = ndb.KeyProperty(kind='ClerkshipTrade')
+    match_to_current = ndb.KeyProperty(kind='ClerkshipTrade')
 
     def is_valid(self):
         return self.current != self.desired
         # TODO: add check for update that submitter is same as original
 
     def get_json(self):
-        return {'block': self.block,
-                'current': self.current,
-                'desired': self.desired,
-                'key': self.key.urlsafe(),
-                'student': {'email': self.student.email}
-                }
+        j = {'block': self.block,
+        'current': self.current,
+        'desired': self.desired,
+        'key': self.key.urlsafe(),
+        'student': {'email': self.student.email}}
+
+        if self.match_to_current:
+            match_to_current = self.match_to_current.get()
+            match_to_desired = self.match_to_desired.get()
+            j['match_to_current_email'] = match_to_current.student.email
+            j['match_to_desired_email'] = match_to_desired.student.email
+
+        return j
 
 
 # [END greeting]
@@ -211,12 +220,46 @@ class CplexOut(webapp2.RequestHandler):
         response_obj = {'data': data}
         self.response.out.write(json.dumps(response_obj))
 
+class UploadMatches(webapp2.RequestHandler):
+    def post(self):
+        register_name = self.request.get('register_name',
+                                         DEFAULT_REGISTER_NAME)
+
+        all_trades = ClerkshipTrade.query(
+                        ancestor=register_key(register_name)).fetch()
+
+        # zero out past matches
+        for trade in all_trades:
+            trade.match_to_desired = None
+            trade.match_to_current = None
+        ndb.put_multi(all_trades)
+
+        # Get request and update trades to match
+        results = json.loads(self.request.body)
+        for key, matches in results['data'].iteritems():
+            trade = ndb.Key(urlsafe=key).get()
+            to_current_key = ndb.Key(urlsafe=matches['match_to_current'])
+            to_desired_key = ndb.Key(urlsafe=matches['match_to_desired'])
+            trade.match_to_current = to_current_key
+            trade.match_to_desired = to_desired_key
+            trade.put()
+
+        self.response.write('Save successful')
+
+class Results(webapp2.RequestHandler):
+    def get(self):
+        template = JINJA_ENVIRONMENT.get_template('results.html')
+        self.response.write(template.render())
+        
+
 # [START app]
 app = webapp2.WSGIApplication([
     ('/', MainPage),
     ('/load', Load),
     ('/register', Register),
     ('/list', List),
-    ('/cplex', CplexOut)
+    ('/cplex', CplexOut),
+    ('/match', UploadMatches),
+    ('/results', Results)
 ], debug=True)
 # [END app]

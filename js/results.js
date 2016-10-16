@@ -12,12 +12,12 @@ $(function() {
   };
 
   // This is passed into the backend to authenticate the user.
-  window.userIdToken = null;
+  userIdToken = null;
 
   // Firebase log-in widget
   function configureFirebaseLoginWidget() {
     var uiConfig = {
-      'signInSuccessUrl': '/',
+      'signInSuccessUrl': '/results',
       'signInOptions': [
         // Leave the lines as is for the providers you want to offer your users.
         firebase.auth.EmailAuthProvider.PROVIDER_ID
@@ -29,22 +29,6 @@ $(function() {
   }
 
   var model = {
-    save: function(data, block) {
-      $.ajax({
-        headers: {
-          'Authorization': 'Bearer ' + window.userIdToken
-        },
-        url: backendHostUrl + '/register',
-        type: 'POST',
-        data: data,
-        success: function(response) {
-          ctrl.updateForm(response.data);
-        },
-        error: function(xhr, status, msg) {
-          ctrl.updateFailure(block, 'Unable to save trade');
-        }
-      });
-    },
     load: function() {
       $.ajax({
         headers: {
@@ -54,7 +38,7 @@ $(function() {
         type: 'GET',
         success: function(response) {
           console.log(response);
-          ctrl.load(response.data);
+          ctrl.update(response.data);
         }
       });
     }
@@ -63,66 +47,49 @@ $(function() {
   var ctrl = {
     init: function() {
       view.init();
+    },
+    load: function() {
       model.load();
     },
-    save: function(data, block) {
-      model.save(data, block);
-    },
-    updateForm: function(data) {
-      console.log('updating ' + data.block);
-      view.updateBlock(data);
-    },
-    updateFailure: function(block, msg) {
-      view.resetSubmit(block);
-      view.alert(msg);
-    },
-    load: function(data) {
+    update: function(data) {
       for (var block in data) {
-        ctrl.updateForm(data[block])
+        view.update(data[block])
       }
+    },
+    map: function(input) {
+      var m = {'pcpsych': 'Primary Care / Psych',
+      'imneuro': 'Medicine / Neurology',
+      'surgem': 'Surgery / Emergency',
+      'pedobgyn': 'Pediatrics / ObGyn'};
+      return m[input];
     }
   };
 
   var view = {
     init: function() {
-      $('form').submit(function(event) {
-        event.preventDefault();
-        var data = $(this).serialize();
-        var block = $(this).prop('id');
-        console.log('id is ' + block);
-        console.log('data is ' + data);
-        var button = $(this).find('input:submit');
-        button.prop('disabled', true);
-        button.prop('value', 'Saving...');
-        ctrl.save(data, block);
-      });
+      $('.block').find('.matchinfo').hide();
+      $('.matchstatus').text('not found');
     },
-    updateBlock: function(data) {
-      var form = $('form#' + data.block);
-      form.find('input[name="key"]').val(data.key);
-      form.find('select[name="current"]').val(data.current);
-      form.find('select[name="desired"]').val(data.desired);
-      var button = form.find('input:submit');
-      console.log(button);
-      button.addClass('green');
-      button.prop('disabled', false);
-      button.prop('value', 'Update Trade');
-    },
-    resetSubmit: function(block) {
-      var form = $('form#' + block);
-      var key = form.find('input[name="key"]').val();
-      var button = form.find('input:submit');
-      var buttonText = 'Submit Trade';
-      if (key.length > 0) {
-        buttonText = 'Update Trade';
-        button.addClass('green');
+    update: function(data) {
+      var block = $('div#block' + data.block);
+      var status = block.find('.matchstatus');
+      var info = block.find('.matchinfo');
+      var desired = block.find('.desired');
+      var donor = block.find('.donor');
+      var current = block.find('.current');
+      var receiver = block.find('.receiver');
+      if (data.match_to_current_email) {
+        status.text('found!');
+        info.show();
+        desired.text(ctrl.map(data.desired));
+        donor.text(data.match_to_desired_email);
+        current.text(ctrl.map(data.current));
+        receiver.text(data.match_to_current_email);
       }
-      button.prop('value', buttonText);
-      button.prop('disabled', false);
-    },
-    alert: function(msg) {
-      window.alert(msg);
-
+      else {
+        status.text('not found')
+        info.hide();
+      }
     }
   };
 
@@ -144,7 +111,7 @@ $(function() {
 
         user.getToken().then(function(idToken) {
           window.userIdToken = idToken;
-          ctrl.init();
+          ctrl.load();
 
           $('#user').text(welcomeName);
           $('#logged-in').show();
@@ -162,7 +129,7 @@ $(function() {
     });
   }
 
+  ctrl.init();
   configureFirebaseLogin();
   configureFirebaseLoginWidget();
 });
-
