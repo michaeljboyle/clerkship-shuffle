@@ -67,7 +67,7 @@ $(function() {
 
   var view = {
     init: function() {
-      $('.block').find('.matchinfo').hide();
+      $('.matchinfo').hide();
       $('.matchstatus').text('not found');
     },
     update: function(data) {
@@ -79,6 +79,7 @@ $(function() {
       var current = block.find('.current');
       var receiver = block.find('.receiver');
       if (data.match_to_current_email) {
+        block.find('.mdl-card__title').addClass('match');
         status.text('found!');
         info.show();
         desired.text(ctrl.map(data.desired));

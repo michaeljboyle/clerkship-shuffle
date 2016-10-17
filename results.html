@@ -3,34 +3,28 @@
 <html>
   <head>
     <!-- [START css] -->
-    <link type="text/css" rel="stylesheet" href="/bootstrap/css/bootstrap.css">
-    <link type="text/css" rel="stylesheet" href="/bootstrap/css/bootstrap-responsive.css">
-    <!-- [END css] -->
-    <style type="text/css">
-      body {
-        padding-top: 40px;
-        padding-bottom: 40px;
-        background-color: #f5f5f5;
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://code.getmdl.io/1.2.1/material.indigo-pink.min.css">
+    <style>
+      .input-card.mdl-card {
+        max-width: 300px;
       }
-      blockquote {
-        margin-bottom: 10px;
-        border-left-color: #bbb;
+      
+      .input-card > .mdl-card__title {
+        color: #fff;
+        background-color: #3E4EB8;/*#ff4081;*/
       }
-      form {
-        margin-top: 10px;
+
+      .input-card > .mdl-card__title.match {
+        background-color: #ff4081;
       }
-      .form-signin input[type="text"] {
-        font-size: 16px;
-        height: auto;
-        margin-bottom: 15px;
-        padding: 7px 9px;
+      /*
+      .mdl-card__actions > input {
+        float: right;
       }
-      .row {
-        margin-left: 0px;
-        margin-top: 10px;
-        overflow: scroll;
-      }
+      */
     </style>
+    <script defer src="https://code.getmdl.io/1.2.1/material.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/3.4.1/firebase.js"></script>
     <script src="https://www.gstatic.com/firebasejs/3.1.0/firebase-auth.js"></script>
@@ -40,38 +34,46 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
   </head>
   <body>
-    <div class="navbar navbar-inverse navbar-fixed-top">
-      <div class="navbar-inner">
-        <div class="container">
-          <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-          <a class="brand" href="#">Clerkship Shuffle</a>
+    <!-- Always shows a header, even in smaller screens. -->
+    <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+      <header class="mdl-layout__header">
+        <div class="mdl-layout__header-row">
+          <!-- Title -->
+          <span class="mdl-layout-title">Clerkship Shuffle</span>
+          <!-- Add spacer, to align navigation to the right -->
+          <div class="mdl-layout-spacer"></div>
+          <!-- Navigation. We hide it in small screens. -->
+          <nav class="mdl-navigation mdl-layout--large-screen-only">
+            <a class="mdl-navigation__link" id="user"></a>
+          </nav>
         </div>
+      </header>
+      <div id="logged-out">
+        <h4>Sign in to access your preferences</h4>
+        <div id="firebaseui-auth-container"></div>
       </div>
-    </div>
-    <div id="logged-out">
-      <h3>Sign in to access your preferences</h3>
-      <div id="firebaseui-auth-container"></div>
-    </div>
-    <div class="container" id='logged-in'>
-      <h3>Welcome, <span id="user"></span>!</h3>
-      {% for i in range(4) %}
-      <div class='block' id='block{{ loop.index }}'>
-        <h2>Block {{ loop.index }}</h2>
-        <div>
-          <h3>Match <span class='matchstatus'></span></h3>
-          <div class='matchinfo'>
-            <div><span class='donor'></span> will give you <span class='desired'></span></div>
-            <div><span class='receiver'></span> will get your <span class='current'></span></div>
+      <main class="mdl-layout__content" id="logged-in">
+        <div class="page-content">
+          <div class="mdl-grid">
+          {% for i in range(4) %}
+            <div id="block{{ loop.index }}" class="mdl-cell mdl-cell--3-col mdl-cell--4-col-tablet mdl-cell--4-col-phone">
+              <div class="input-card mdl-card mdl-shadow--2dp">
+                <div class="mdl-card__title">
+                  <h2 class="mdl-card__title-text">Block {{ loop.index }}</h2>
+                </div>
+                <div class="mdl-card__supporting-text">
+                  <h3>Match <span class='matchstatus'></span></h3>
+                  <div class='matchinfo'>
+                    <div><span class='donor'></span> will give you <span class='desired'></span></div>
+                    <div><span class='receiver'></span> will get your <span class='current'></span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
           </div>
-        </div>
-      </div>
-      {% endfor %}
-
-      <hr>
+        </div> <!-- End of main page content -->
+      </main>
     </div>
   </body>
 </html>
