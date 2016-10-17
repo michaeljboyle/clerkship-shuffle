@@ -167,8 +167,8 @@ class Register(webapp2.RequestHandler):
         key = self.request.get('key')
         print 'block is ' + self.request.get('block')
         block = int(self.request.get('block'))
-        current = self.request.get('current')
-        desired = self.request.get('desired')
+        current = self.request.get('Current')
+        desired = self.request.get('Desired')
 
         if key:
             trade = ndb.Key(urlsafe=key).get()
