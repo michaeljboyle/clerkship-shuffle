@@ -201,8 +201,9 @@ class CplexOut(webapp2.RequestHandler):
         all_trades = ClerkshipTrade.query(
                         ancestor=register_key(register_name)).fetch()
         edges = []
-        num_nodes = len(all_trades)
+        nodes = []
         for trade in all_trades:
+            nodes.append(trade.key.urlsafe())
             for other_trade in all_trades:
                 # First check they're not the same
                 if trade.key.id() == other_trade.key.id():
@@ -215,7 +216,7 @@ class CplexOut(webapp2.RequestHandler):
                     edges.append(edge_string)
         obj = [1.0 for edge in edges]
 
-        data = {'edges': edges, 'num_nodes': num_nodes, 'obj': obj}
+        data = {'edges': edges, 'nodes': nodes, 'obj': obj}
         self.response.headers['Content-Type'] = 'application/json'
         response_obj = {'data': data}
         self.response.out.write(json.dumps(response_obj))

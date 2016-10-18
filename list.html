@@ -2,13 +2,13 @@
 <div>
   {{ record.student.email }}, {{ record.block }}, {{ record.current }}, {{ record.desired }}, 
   {% if record.match_to_current %}
-    {{ record.match_to_current.id() }}
+    {{ record.match_to_current.get().student.email }}
   {% else %}
     no match_to_current 
   {% endif %}
   ,
   {% if record.match_to_desired %}
-    {{ record.match_to_desired.id() }}
+    {{ record.match_to_desired.get().student.email }}
   {% else %}
     no match_to_desired
   {% endif %}
