@@ -199,7 +199,8 @@ class CplexOut(webapp2.RequestHandler):
         register_name = self.request.get('register_name',
                                          DEFAULT_REGISTER_NAME)
         all_trades = ClerkshipTrade.query(
-                        ancestor=register_key(register_name)).fetch()
+                        ancestor=register_key(register_name)).order(
+                        ClerkshipTrade.student.email, ClerkshipTrade.block).fetch()
         edges = []
         nodes = []
         for trade in all_trades:
@@ -216,7 +217,39 @@ class CplexOut(webapp2.RequestHandler):
                     edges.append(edge_string)
         obj = [1.0 for edge in edges]
 
-        data = {'edges': edges, 'nodes': nodes, 'obj': obj}
+        # Now create map of edges by students to associate edges by associated trades
+        # i.e. trades that must happen together
+        student_map = {}
+        for trade in all_trades:
+            student = trade.student.email
+            if student not in student_map:
+                student_map[student] = [trade]
+            else:
+                student_map[student].append(trade)
+
+        # Now find which trades are connected i.e. must be executed together or not at all
+        connected_trades = []
+        for student, trades in student_map.iteritems():
+            if len(trades) < 4: # i.e. all these trades MUST be connected
+                connected_trades.append([trade.key.urlsafe() for trade in trades])
+            else: # can either be 1 4-way or 2 2-ways
+                trade0 = trades.pop(0)
+                is_2way = False
+                for i, trade in enumerate(trades):
+                    if trade.current == trade0.desired and trade.desired == trade0.current:
+                        # Must be a 2 2-ways
+                        connected_trades.append([trade0.key.urlsafe(), trades.pop(i).key.urlsafe()])
+                        # Need to identify the remaining two others
+                        connected_trades.append([t.key.urlsafe() for t in trades])
+                        is_2way = True
+                        break
+                if not is_2way:
+                    # Then append all the trades, remembering we already popped out trade 0
+                    trades.append(trade0)
+                    connected_trades.append([t.key.urlsafe() for t in trades])
+
+
+        data = {'edges': edges, 'nodes': nodes, 'obj': obj, 'connected_trades': connected_trades}
         self.response.headers['Content-Type'] = 'application/json'
         response_obj = {'data': data}
         self.response.out.write(json.dumps(response_obj))

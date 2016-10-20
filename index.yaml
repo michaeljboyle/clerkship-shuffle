@@ -3,3 +3,4 @@ indexes:
   ancestor: yes
   properties:
   - name: student.email
+  - name: block
